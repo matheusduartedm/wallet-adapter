@@ -1,9 +1,11 @@
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { ConnectionProvider, WalletProvider, useAnchorWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl } from '@solana/web3.js';
+import { clusterApiUrl, Connection } from '@solana/web3.js';
+import { Program, Provider, web3, BN } from '@coral-xyz/anchor';
 import React, { FC, ReactNode, useMemo } from 'react';
+import idl from './idl.json';
 
 require('./App.css');
 require('@solana/wallet-adapter-react-ui/styles.css');
@@ -54,8 +56,28 @@ const Context: FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 const Content: FC = () => {
+    const wallet = useAnchorWallet();
+
+    function getProvider() {
+        if (!wallet) {
+            return null
+        }
+
+        const network = "http://127.0.0.1:8899";
+        const connection = new Connection(network, "processed");
+
+        const provider = new Provider(
+            connection, wallet, {"preflightCommitment": "processed"},
+        );
+        return provider;
+    }
+
     return (
         <div className="App">
+            <button>Initialize</button>
+            <button>Increment</button>
+            <button>Decrement</button>
+            <button>Update</button>
             <WalletMultiButton />
         </div>
     );
